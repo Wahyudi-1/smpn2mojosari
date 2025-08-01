@@ -2,7 +2,7 @@
  * =================================================================
  * SCRIPT UTAMA - SISTEM JURNAL & DISIPLIN GURU
  * =================================================================
- * @version 5.0 - Final Production Code with Full History Panel
+ * @version 6.0 - Final Production Code with All History Panels
  * @author Disesuaikan oleh AI untuk Proyek Anda
  *
  * Terhubung dengan Supabase untuk otentikasi dan database.
@@ -14,7 +14,7 @@
 // ====================================================================
 
 const SUPABASE_URL = 'https://patjsszankjdlnktrfmh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdGpzc3phbmtqZGxua3RyZm1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzEzODUsImV4cCI6MjA2OTM0NzM4NX0.eZLV-7HbhQMFS3EF4e-Q5UuPRKVssgirL1cQxj7yJEg';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI_NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdGpzc3phbmtqZGxua3RyZm1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzEzODUsImV4cCI6MjA2OTM0NzM4NX0.eZLV-7HbhQMFS3EF4e-Q5UuPRKVssgirL1cQxj7yJEg';
 
 const { createClient } = window.supabase;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -28,7 +28,9 @@ const AppState = {
     teachers: [],
     allAssignments: [],
     allJurnalHistory: [],
-    filteredJurnalHistory: []
+    filteredJurnalHistory: [],
+    allDisiplinHistory: [],
+    filteredDisiplinHistory: []
 };
 
 // ====================================================================
@@ -221,7 +223,7 @@ function populateInitialDropdowns() {
     }
 }
 
-// --- 4.2 Fungsi Modul Jurnal ---
+// --- 4.2 Fungsi Modul Jurnal & Riwayat Jurnal ---
 async function loadSiswaForJurnal() {
     const kelas = document.getElementById('jurnalKelas').value;
     const mapel = document.getElementById('jurnalMapel').value;
@@ -430,7 +432,7 @@ async function editJurnalHandler(jurnalId) {
     console.log(`Edit diminta untuk Jurnal ID: ${jurnalId}`);
 }
 
-// --- 4.3 Fungsi Modul Disiplin ---
+// --- 4.3 Fungsi Modul Disiplin & Riwayat Disiplin ---
 function setupSiswaSearch() {
     const searchInput = document.getElementById('nisnDisiplinInput');
     const suggestionsContainer = document.getElementById('nisnSuggestions');
@@ -486,6 +488,83 @@ async function handleDisiplinSubmit(event) {
     event.target.reset();
     document.getElementById('namaSiswaDisiplin').value = '';
 }
+
+async function loadRiwayatDisiplin() {
+    const tableBody = document.getElementById('riwayatDisiplinTableBody');
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="7">Memuat riwayat...</td></tr>';
+
+    showLoading(true);
+    const { data, error } = await supabase
+        .from('catatan_disiplin')
+        .select(`
+            id,
+            created_at,
+            siswa (nisn, nama),
+            pelanggaran_master (deskripsi, poin),
+            profiles (full_name)
+        `)
+        .order('created_at', { ascending: false });
+    
+    showLoading(false);
+
+    if (error) {
+        tableBody.innerHTML = '<tr><td colspan="7">Gagal memuat riwayat.</td></tr>';
+        return showStatusMessage('Gagal memuat data riwayat disiplin.', 'error');
+    }
+
+    AppState.allDisiplinHistory = data;
+    renderRiwayatDisiplinTable(data);
+}
+
+function renderRiwayatDisiplinTable(data) {
+    const tableBody = document.getElementById('riwayatDisiplinTableBody');
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="7" style="text-align: center;">Tidak ada riwayat ditemukan sesuai filter.</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = data.map(d => `
+        <tr>
+            <td data-label="Tanggal">${new Date(d.created_at).toLocaleDateString('id-ID')}</td>
+            <td data-label="NISN">${d.siswa?.nisn || 'N/A'}</td>
+            <td data-label="Nama Siswa">${d.siswa?.nama || 'Siswa Dihapus'}</td>
+            <td data-label="Pelanggaran">${d.pelanggaran_master?.deskripsi || 'Pelanggaran Dihapus'}</td>
+            <td data-label="Poin">${d.pelanggaran_master?.poin || 'N/A'}</td>
+            <td data-label="Pencatat">${d.profiles?.full_name || 'Pengguna Dihapus'}</td>
+            <td data-label="Aksi">
+                <button class="btn btn-sm btn-secondary" onclick="editDisiplinHandler('${d.id}')">Ubah</button>
+            </td>
+        </tr>
+    `).join('');
+}
+
+function applyRiwayatDisiplinFilter() {
+    const filterNisn = document.getElementById('riwayatDisiplinFilterNisn').value.trim();
+    const filterMulai = document.getElementById('riwayatDisiplinFilterTanggalMulai').value;
+    const filterSelesai = document.getElementById('riwayatDisiplinFilterTanggalSelesai').value;
+
+    AppState.filteredDisiplinHistory = AppState.allDisiplinHistory.filter(catatan => {
+        const tanggalCatatan = new Date(catatan.created_at);
+        const mulai = filterMulai ? new Date(filterMulai) : null;
+        const selesai = filterSelesai ? new Date(filterSelesai) : null;
+        if(mulai) mulai.setHours(0, 0, 0, 0);
+        if(selesai) selesai.setHours(23, 59, 59, 999);
+        
+        const isNisnMatch = !filterNisn || (catatan.siswa && catatan.siswa.nisn.includes(filterNisn));
+        const isTanggalMatch = (!mulai || tanggalCatatan >= mulai) && (!selesai || tanggalCatatan <= selesai);
+
+        return isNisnMatch && isTanggalMatch;
+    });
+
+    renderRiwayatDisiplinTable(AppState.filteredDisiplinHistory);
+}
+
+async function editDisiplinHandler(catatanId) {
+    showStatusMessage('Fitur "Ubah Catatan Disiplin" sedang dalam pengembangan.', 'info');
+    console.log(`Edit diminta untuk Catatan Disiplin ID: ${catatanId}`);
+}
+
 
 // --- 4.4 Fungsi Modul Admin (Penugasan & Pengguna) ---
 async function handlePenugasanSubmit(event) {
@@ -714,6 +793,7 @@ function setupDashboardListeners() {
             e.currentTarget.classList.add('active');
 
             if (sectionId === 'riwayatJurnalSection') loadRiwayatJurnal();
+            if (sectionId === 'riwayatDisiplinSection') loadRiwayatDisiplin();
             if (sectionId === 'penugasanSection') loadPenugasanTable();
             if (sectionId === 'siswaSection') loadSiswaTable();
         });
@@ -738,6 +818,8 @@ function setupDashboardListeners() {
     document.getElementById('filterRiwayatButton')?.addEventListener('click', applyRiwayatFilter);
     document.getElementById('refreshRiwayatButton')?.addEventListener('click', loadRiwayatJurnal);
     document.getElementById('exportRiwayatButton')?.addEventListener('click', exportRiwayatToExcel);
+    document.getElementById('filterRiwayatDisiplinButton')?.addEventListener('click', applyRiwayatDisiplinFilter);
+    document.getElementById('refreshRiwayatDisiplinButton')?.addEventListener('click', loadRiwayatDisiplin);
     
     setupSiswaSearch();
 }
