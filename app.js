@@ -2,7 +2,7 @@
  * =================================================================
  * SCRIPT UTAMA - SISTEM JURNAL & DISIPLIN GURU
  * =================================================================
- * @version 4.0 - Final Production Code with Presence Logic
+ * @version 5.0 - Final Production Code with Full History Panel
  * @author Disesuaikan oleh AI untuk Proyek Anda
  *
  * Terhubung dengan Supabase untuk otentikasi dan database.
@@ -26,7 +26,9 @@ const AppState = {
     students: [],
     violations: [],
     teachers: [],
-    allAssignments: []
+    allAssignments: [],
+    allJurnalHistory: [],
+    filteredJurnalHistory: []
 };
 
 // ====================================================================
@@ -329,27 +331,103 @@ async function handleJurnalSubmit(event) {
 async function loadRiwayatJurnal() {
     const tableBody = document.getElementById('riwayatJurnalTableBody');
     if (!tableBody) return;
-    tableBody.innerHTML = '<tr><td colspan="5">Memuat riwayat...</td></tr>';
+    tableBody.innerHTML = '<tr><td colspan="6">Memuat riwayat...</td></tr>';
     
-    let query = supabase.from('jurnal_pelajaran').select('*, profiles(full_name)').order('tanggal', { ascending: false });
+    showLoading(true);
+    let query = supabase.from('jurnal_pelajaran').select('*').order('tanggal', { ascending: false });
     if (AppState.profile.role !== 'Admin') {
         query = query.eq('guru_id', AppState.user.id);
     }
 
     const { data, error } = await query;
-    if (error) return tableBody.innerHTML = '<tr><td colspan="5">Gagal memuat riwayat.</td></tr>';
+    showLoading(false);
+
+    if (error) {
+        tableBody.innerHTML = '<tr><td colspan="6">Gagal memuat riwayat.</td></tr>';
+        return showStatusMessage('Gagal memuat data riwayat.', 'error');
+    }
+
+    AppState.allJurnalHistory = data;
+    AppState.filteredJurnalHistory = data;
     
-    tableBody.innerHTML = data.length === 0 
-        ? '<tr><td colspan="5" style="text-align: center;">Belum ada riwayat jurnal.</td></tr>'
-        : data.map(j => `
+    populateDropdown('riwayatFilterKelas', AppState.allJurnalHistory, 'kelas', 'kelas', 'Semua Kelas');
+    populateDropdown('riwayatFilterMapel', AppState.allJurnalHistory, 'mata_pelajaran', 'mata_pelajaran', 'Semua Mapel');
+    
+    renderRiwayatJurnalTable(AppState.filteredJurnalHistory);
+}
+
+function renderRiwayatJurnalTable(data) {
+    const tableBody = document.getElementById('riwayatJurnalTableBody');
+    document.getElementById('exportRiwayatButton').style.display = data.length > 0 ? 'inline-block' : 'none';
+
+    if (data.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" style="text-align: center;">Tidak ada riwayat ditemukan sesuai filter.</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = data.map(j => {
+        const catatanRingkas = (j.catatan || '').replace(/\n/g, ' ').substring(0, 70);
+        return `
             <tr>
                 <td data-label="Tanggal">${new Date(j.tanggal).toLocaleDateString('id-ID')}</td>
                 <td data-label="Kelas">${j.kelas}</td>
                 <td data-label="Mapel">${j.mata_pelajaran}</td>
                 <td data-label="Materi">${j.materi.substring(0, 50)}...</td>
-                <td data-label="Aksi"><button class="btn btn-sm btn-secondary">Detail</button></td>
+                <td data-label="Catatan">${catatanRingkas}...</td>
+                <td data-label="Aksi">
+                    <button class="btn btn-sm btn-secondary" onclick="editJurnalHandler('${j.id}')">Ubah</button>
+                </td>
             </tr>
-        `).join('');
+        `;
+    }).join('');
+}
+
+function applyRiwayatFilter() {
+    const filterKelas = document.getElementById('riwayatFilterKelas').value;
+    const filterMapel = document.getElementById('riwayatFilterMapel').value;
+    const filterMulai = document.getElementById('riwayatFilterTanggalMulai').value;
+    const filterSelesai = document.getElementById('riwayatFilterTanggalSelesai').value;
+
+    AppState.filteredJurnalHistory = AppState.allJurnalHistory.filter(jurnal => {
+        const tanggalJurnal = new Date(jurnal.tanggal);
+        const mulai = filterMulai ? new Date(filterMulai) : null;
+        const selesai = filterSelesai ? new Date(filterSelesai) : null;
+        if(mulai) mulai.setHours(0, 0, 0, 0);
+        if(selesai) selesai.setHours(23, 59, 59, 999);
+        
+        const isKelasMatch = !filterKelas || jurnal.kelas === filterKelas;
+        const isMapelMatch = !filterMapel || jurnal.mata_pelajaran === filterMapel;
+        const isTanggalMatch = (!mulai || tanggalJurnal >= mulai) && (!selesai || tanggalJurnal <= selesai);
+
+        return isKelasMatch && isMapelMatch && isTanggalMatch;
+    });
+
+    renderRiwayatJurnalTable(AppState.filteredJurnalHistory);
+}
+
+function exportRiwayatToExcel() {
+    const dataToExport = AppState.filteredJurnalHistory;
+    if (dataToExport.length === 0) {
+        return showStatusMessage('Tidak ada data untuk diekspor.', 'info');
+    }
+
+    const formattedData = dataToExport.map(j => ({
+        Tanggal: new Date(j.tanggal).toLocaleDateString('id-ID'),
+        Kelas: j.kelas,
+        'Mata Pelajaran': j.mata_pelajaran,
+        Materi: j.materi,
+        Catatan: j.catatan
+    }));
+
+    const worksheet = XLSX.utils.json_to_sheet(formattedData);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Riwayat Jurnal");
+    XLSX.writeFile(workbook, `Riwayat_Jurnal_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+async function editJurnalHandler(jurnalId) {
+    showStatusMessage('Fitur "Ubah" sedang dalam pengembangan.', 'info');
+    console.log(`Edit diminta untuk Jurnal ID: ${jurnalId}`);
 }
 
 // --- 4.3 Fungsi Modul Disiplin ---
@@ -641,6 +719,7 @@ function setupDashboardListeners() {
         });
     });
 
+    // Event listeners untuk form
     document.getElementById('formJurnal')?.addEventListener('submit', handleJurnalSubmit);
     document.getElementById('formDisiplin')?.addEventListener('submit', handleDisiplinSubmit);
     document.getElementById('formPenugasan')?.addEventListener('submit', handlePenugasanSubmit);
@@ -648,16 +727,18 @@ function setupDashboardListeners() {
     document.getElementById('formSiswa')?.addEventListener('submit', saveSiswaHandler);
     document.getElementById('resetSiswaButton')?.addEventListener('click', resetFormSiswa);
     
+    // Event listeners untuk tombol aksi
     document.getElementById('refreshSiswaButton')?.addEventListener('click', refreshSiswaData);
     document.getElementById('exportSiswaButton')?.addEventListener('click', exportSiswaToExcel);
     document.getElementById('importSiswaButton')?.addEventListener('click', () => {
         document.getElementById('importSiswaInput').click();
     });
     document.getElementById('importSiswaInput')?.addEventListener('change', handleSiswaImport);
-    
-    // Listener untuk tombol tampilkan siswa di form jurnal
     document.getElementById('loadSiswaForJurnalButton')?.addEventListener('click', loadSiswaForJurnal);
-
+    document.getElementById('filterRiwayatButton')?.addEventListener('click', applyRiwayatFilter);
+    document.getElementById('refreshRiwayatButton')?.addEventListener('click', loadRiwayatJurnal);
+    document.getElementById('exportRiwayatButton')?.addEventListener('click', exportRiwayatToExcel);
+    
     setupSiswaSearch();
 }
 
