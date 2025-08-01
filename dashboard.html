@@ -99,22 +99,10 @@
                 <div class="card">
                     <div class="card-header">Filter Riwayat Jurnal Pembelajaran</div>
                     <div id="riwayatFilterForm" class="form-grid">
-                        <div class="form-group">
-                            <label for="riwayatFilterKelas">Filter Kelas</label>
-                            <select id="riwayatFilterKelas"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="riwayatFilterMapel">Filter Mata Pelajaran</label>
-                            <select id="riwayatFilterMapel"></select>
-                        </div>
-                        <div class="form-group">
-                            <label for="riwayatFilterTanggalMulai">Dari Tanggal</label>
-                            <input type="date" id="riwayatFilterTanggalMulai">
-                        </div>
-                        <div class="form-group">
-                            <label for="riwayatFilterTanggalSelesai">Sampai Tanggal</label>
-                            <input type="date" id="riwayatFilterTanggalSelesai">
-                        </div>
+                        <div class="form-group"><label for="riwayatFilterKelas">Filter Kelas</label><select id="riwayatFilterKelas"></select></div>
+                        <div class="form-group"><label for="riwayatFilterMapel">Filter Mata Pelajaran</label><select id="riwayatFilterMapel"></select></div>
+                        <div class="form-group"><label for="riwayatFilterTanggalMulai">Dari Tanggal</label><input type="date" id="riwayatFilterTanggalMulai"></div>
+                        <div class="form-group"><label for="riwayatFilterTanggalSelesai">Sampai Tanggal</label><input type="date" id="riwayatFilterTanggalSelesai"></div>
                         <div class="form-group form-group-full" style="align-self: end;">
                             <button type="button" id="filterRiwayatButton" class="btn btn-primary">Terapkan Filter</button>
                             <button type="button" id="refreshRiwayatButton" class="btn btn-secondary" style="margin-left: 10px;">Refresh Data</button>
@@ -126,14 +114,7 @@
                     <div class="table-container">
                         <table>
                             <thead>
-                                <tr>
-                                    <th>Tanggal</th>
-                                    <th>Kelas</th>
-                                    <th>Mata Pelajaran</th>
-                                    <th>Materi</th>
-                                    <th>Catatan (Termasuk Presensi)</th>
-                                    <th>Aksi</th>
-                                </tr>
+                                <tr><th>Tanggal</th><th>Kelas</th><th>Mata Pelajaran</th><th>Materi</th><th>Catatan (Termasuk Presensi)</th><th>Aksi</th></tr>
                             </thead>
                             <tbody id="riwayatJurnalTableBody">
                                 <tr><td colspan="6" style="text-align: center;">Gunakan filter untuk menampilkan riwayat.</td></tr>
@@ -145,11 +126,26 @@
 
             <div id="riwayatDisiplinSection" class="content-section" style="display: none;">
                 <div class="card">
-                    <div class="card-header">Riwayat Catatan Disiplin</div>
+                    <div class="card-header">Filter Riwayat Catatan Disiplin</div>
+                    <div id="riwayatDisiplinFilterForm" class="form-grid">
+                        <div class="form-group"><label for="riwayatDisiplinFilterNisn">Filter berdasarkan NISN</label><input type="text" id="riwayatDisiplinFilterNisn" placeholder="Masukkan NISN siswa..."></div>
+                        <div class="form-group"><label for="riwayatDisiplinFilterTanggalMulai">Dari Tanggal</label><input type="date" id="riwayatDisiplinFilterTanggalMulai"></div>
+                        <div class="form-group"><label for="riwayatDisiplinFilterTanggalSelesai">Sampai Tanggal</label><input type="date" id="riwayatDisiplinFilterTanggalSelesai"></div>
+                        <div class="form-group form-group-full" style="align-self: end;">
+                            <button type="button" id="filterRiwayatDisiplinButton" class="btn btn-primary">Terapkan Filter</button>
+                            <button type="button" id="refreshRiwayatDisiplinButton" class="btn btn-secondary" style="margin-left: 10px;">Refresh Data</button>
+                        </div>
+                    </div>
+                    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-color);">
+                    <h4>Hasil Pencarian Riwayat</h4>
                     <div class="table-container">
                         <table>
-                            <thead><tr><th>Tanggal</th><th>NISN</th><th>Nama Siswa</th><th>Pelanggaran</th><th>Poin</th><th>Pencatat</th></tr></thead>
-                            <tbody id="riwayatDisiplinTableBody"><tr><td colspan="6" style="text-align: center;">Tidak ada riwayat untuk ditampilkan.</td></tr></tbody>
+                            <thead>
+                                <tr><th>Tanggal</th><th>NISN</th><th>Nama Siswa</th><th>Pelanggaran</th><th>Poin</th><th>Pencatat</th><th>Aksi</th></tr>
+                            </thead>
+                            <tbody id="riwayatDisiplinTableBody">
+                                <tr><td colspan="7" style="text-align: center;">Gunakan filter untuk menampilkan riwayat.</td></tr>
+                            </tbody>
                         </table>
                     </div>
                 </div>
