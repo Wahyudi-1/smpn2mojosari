@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <!-- ========================================================== -->
+    <!-- METADATA & KONFIGURASI HALAMAN                             -->
+    <!-- ========================================================== -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - Sistem Jurnal & Disiplin Guru</title>
+
+    <!-- ========================================================== -->
+    <!-- STYLESHEETS & FONTS                                        -->
+    <!-- ========================================================== -->
+    
+    <!-- 1. Google Fonts (Poppins) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    
+    <!-- 2. Main Stylesheet (style.css) -->
+    <link rel="stylesheet" href="style.css">
+
+    <!-- 3. Favicon (Ikon Tab Browser) -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+        
+</head>
+
+<body class="login-page-v2">
+
+    <!-- ========================================================== -->
+    <!-- MAIN LOGIN CONTAINER                                       -->
+    <!-- ========================================================== -->
+    <div class="login-box">
+        
+        <!-- Kolom Kiri: Ilustrasi & Pesan Selamat Datang -->
+        <div class="login-illustration">
+            <div class="illustration-content">
+                <!-- Ikon SVG yang relevan -->
+                <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V18C21 19.1046 20.1046 20 19 20Z" fill="#a8c7fa"/>
+                    <path d="M7 8H17V10H7V8Z" fill="#4a90e2"/>
+                    <path d="M7 12H17V14H7V12Z" fill="#4a90e2"/>
+                    <path d="M7 16H13V18H7V16Z" fill="#4a90e2"/>
+                </svg>
+                <h3>Sistem Jurnal & Disiplin Guru</h3>
+                <p>Akses cepat dan terpusat untuk mengelola data pengajaran dan catatan kedisiplinan siswa.</p>
+            </div>
+        </div>
+        
+        <!-- Kolom Kanan: Form Login -->
+        <div class="login-form-container">
+            <div class="login-form-content">
+                
+                <h2 class="logo">Selamat Datang</h2>
+                <p style="color: var(--text-light); margin-bottom: 25px;">Silakan masuk untuk melanjutkan.</p>
+                
+                <form onsubmit="event.preventDefault(); handleLogin();">
+                    
+                    <div class="form-group">
+                        <label for="username">Email</label>
+                        <input type="email" id="username" placeholder="Masukkan alamat email Anda" required autocomplete="email">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <div class="password-wrapper">
+                            <input type="password" id="password" placeholder="Masukkan password Anda" required autocomplete="current-password">
+                            <span id="togglePassword" class="toggle-password-icon"></span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" id="loginButton" class="btn btn-primary btn-block">Login</button>
+                    </div>
+
+                    <div class="form-group" style="text-align: center; margin-top: 1rem;">
+                        <a href="#" id="forgotPasswordLink" style="color: var(--primary-color); text-decoration: none; font-size: 0.9em;">Lupa Password?</a>
+                    </div>
+
+                </form>
+                
+                <div id="statusMessage" class="status-message" style="display: none; margin-top: 15px;"></div>
+            </div>
+        </div>
+
+    </div> <!-- End of .login-box -->
+
+    <!-- ========================================================== -->
+    <!-- RESET PASSWORD CONTAINER (SEMBUNYI SECARA DEFAULT)         -->
+    <!-- ========================================================== -->
+    <div id="resetPasswordContainer" class="login-box" style="display: none;">
+        <div class="login-form-container" style="grid-column: 1 / -1;">
+            <div class="login-form-content">
+                
+                <h2 class="logo">Atur Password Baru</h2>
+                <p style="color: var(--text-light); margin-bottom: 25px;">Anda sedang dalam mode pemulihan akun. Silakan masukkan password baru Anda.</p>
+                
+                <form id="resetPasswordForm">
+                    <div class="form-group">
+                        <label for="newPassword">Password Baru</label>
+                        <input type="password" id="newPassword" placeholder="Masukkan password baru (min. 6 karakter)" required>
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: 2rem;">
+                        <button type="submit" class="btn btn-primary btn-block">Simpan Password Baru</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <!-- Akhir dari Reset Password Container -->
+
+
+    <!-- ========================================================== -->
+    <!-- ELEMEN GLOBAL (LOADING OVERLAY)                            -->
+    <!-- ========================================================== -->
+    <div id="loadingIndicator" class="loading-overlay" style="display: none;">
+        <div class="spinner"></div>
+    </div>
+
+    <!-- ========================================================== -->
+    <!-- JAVASCRIPT LIBRARIES & SCRIPT                              -->
+    <!-- ========================================================== -->
+    
+    <!-- Library untuk Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+
+    <!-- Script utama aplikasi -->
+    <script src="app.js"></script>
+
+</body>
+</html>
