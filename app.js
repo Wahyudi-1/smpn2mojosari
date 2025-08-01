@@ -2,7 +2,7 @@
  * =================================================================
  * SCRIPT UTAMA - SISTEM JURNAL & DISIPLIN GURU
  * =================================================================
- * @version 3.0 - Final Production Code
+ * @version 4.0 - Final Production Code with Presence Logic
  * @author Disesuaikan oleh AI untuk Proyek Anda
  *
  * Terhubung dengan Supabase untuk otentikasi dan database.
@@ -220,8 +220,55 @@ function populateInitialDropdowns() {
 }
 
 // --- 4.2 Fungsi Modul Jurnal ---
+async function loadSiswaForJurnal() {
+    const kelas = document.getElementById('jurnalKelas').value;
+    const mapel = document.getElementById('jurnalMapel').value;
+    const tableBody = document.getElementById('presensiTableBody');
+
+    if (!kelas || !mapel) {
+        return showStatusMessage('Harap pilih Kelas dan Mata Pelajaran terlebih dahulu.', 'error');
+    }
+
+    showLoading(true);
+    tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center;">Memuat data siswa...</td></tr>`;
+
+    const { data, error } = await supabase
+        .from('siswa')
+        .select('nisn, nama')
+        .eq('kelas', kelas)
+        .order('nama');
+
+    showLoading(false);
+
+    if (error) {
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center;">Gagal memuat siswa: ${error.message}</td></tr>`;
+        return showStatusMessage('Gagal memuat data siswa.', 'error');
+    }
+
+    if (data.length === 0) {
+        tableBody.innerHTML = `<tr><td colspan="3" style="text-align: center;">Tidak ada data siswa ditemukan untuk kelas ${kelas}.</td></tr>`;
+        return;
+    }
+
+    tableBody.innerHTML = data.map(siswa => `
+        <tr data-nisn="${siswa.nisn}" data-nama="${siswa.nama}">
+            <td data-label="NISN">${siswa.nisn}</td>
+            <td data-label="Nama">${siswa.nama}</td>
+            <td data-label="Kehadiran">
+                <select class="kehadiran-status" style="width:100%; padding: 0.5rem; border-radius: var(--border-radius); border: 1px solid var(--border-color);">
+                    <option value="Hadir" selected>Hadir</option>
+                    <option value="Sakit">Sakit</option>
+                    <option value="Izin">Izin</option>
+                    <option value="Alfa">Alfa</option>
+                </select>
+            </td>
+        </tr>
+    `).join('');
+}
+
 async function handleJurnalSubmit(event) {
     event.preventDefault();
+
     const jurnalData = {
         guru_id: AppState.user.id,
         kelas: document.getElementById('jurnalKelas').value,
@@ -230,15 +277,53 @@ async function handleJurnalSubmit(event) {
         materi: document.getElementById('jurnalMateri').value,
         catatan: document.getElementById('jurnalCatatan').value,
     };
+
     if (!jurnalData.kelas || !jurnalData.mata_pelajaran || !jurnalData.tanggal || !jurnalData.materi) {
-        return showStatusMessage('Harap isi semua kolom yang wajib diisi.', 'error');
+        return showStatusMessage('Harap isi semua kolom jurnal yang wajib diisi.', 'error');
     }
+
+    const presensiRows = document.querySelectorAll('#presensiTableBody tr');
+    const siswaTidakHadir = [];
+
+    presensiRows.forEach(row => {
+        if (row.dataset.nisn) { 
+            const status = row.querySelector('.kehadiran-status').value;
+            if (status !== 'Hadir') {
+                siswaTidakHadir.push({
+                    nama: row.dataset.nama,
+                    status: status
+                });
+            }
+        }
+    });
+
+    let catatanPresensi = "";
+    if (siswaTidakHadir.length > 0) {
+        catatanPresensi += "\n\n--- PRESENSI (TIDAK HADIR) ---\n";
+        catatanPresensi += siswaTidakHadir.map(s => `${s.nama}: ${s.status}`).join('\n');
+    }
+    
+    if (jurnalData.catatan && siswaTidakHadir.length > 0) {
+        jurnalData.catatan += " "; 
+    }
+    jurnalData.catatan += catatanPresensi;
+
+    const siswaDiKelas = AppState.students.filter(s => s.kelas === jurnalData.kelas);
+    if (siswaDiKelas.length > 0 && presensiRows[0]?.cells[0].textContent.includes('Pilih kelas')) {
+         return showStatusMessage('Harap klik "Tampilkan Siswa untuk Presensi" terlebih dahulu.', 'error');
+    }
+
     showLoading(true);
     const { error } = await supabase.from('jurnal_pelajaran').insert(jurnalData);
     showLoading(false);
-    if (error) return showStatusMessage(`Gagal menyimpan jurnal: ${error.message}`, 'error');
-    showStatusMessage('Jurnal berhasil disimpan!', 'success');
+    
+    if (error) {
+        return showStatusMessage(`Gagal menyimpan jurnal: ${error.message}`, 'error');
+    }
+    
+    showStatusMessage('Jurnal & presensi berhasil disimpan!', 'success');
     event.target.reset();
+    document.getElementById('presensiTableBody').innerHTML = `<tr><td colspan="3" style="text-align: center;">Pilih kelas dan mata pelajaran, lalu klik "Tampilkan Siswa".</td></tr>`;
 }
 
 async function loadRiwayatJurnal() {
@@ -570,6 +655,9 @@ function setupDashboardListeners() {
     });
     document.getElementById('importSiswaInput')?.addEventListener('change', handleSiswaImport);
     
+    // Listener untuk tombol tampilkan siswa di form jurnal
+    document.getElementById('loadSiswaForJurnalButton')?.addEventListener('click', loadSiswaForJurnal);
+
     setupSiswaSearch();
 }
 
