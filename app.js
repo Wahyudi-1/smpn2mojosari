@@ -14,8 +14,8 @@
 // ====================================================================
 
 // --- Inisialisasi Klien Supabase ---
-const SUPABASE_URL = 'URL_PROYEK_ANDA_YANG_DISALIN'; // <-- GANTI DENGAN URL ANDA
-const SUPABASE_ANON_KEY = 'KUNCI_ANON_ANDA_YANG_DISALIN'; // <-- GANTI DENGAN KUNCI ANON ANDA
+const SUPABASE_URL = 'https://patjsszankjdlnktrfmh.supabase.co'; // <-- GANTI DENGAN URL ANDA
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdGpzc3phbmtqZGxua3RyZm1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzEzODUsImV4cCI6MjA2OTM0NzM4NX0.eZLV-7HbhQMFS3EF4e-Q5UuPRKVssgirL1cQxj7yJEg'; // <-- GANTI DENGAN KUNCI ANON ANDA
 
 const { createClient } = window.supabase;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
