@@ -25,10 +25,8 @@
         </nav>
     </header>
 
-    <!-- [BARU] Wrapper untuk layout sidebar + konten -->
     <div class="dashboard-wrapper">
         
-        <!-- [BARU] Sidebar Navigasi -->
         <aside class="sidebar-nav">
             <h4>Menu Utama</h4>
             <button data-section="jurnalSection" class="btn-nav active">Input Jurnal</button>
@@ -36,7 +34,6 @@
             <button data-section="riwayatJurnalSection" class="btn-nav">Riwayat Jurnal</button>
             <button data-section="riwayatDisiplinSection" class="btn-nav">Riwayat Disiplin</button>
             
-            <!-- [PINDAH] Menu Admin ditempatkan di sini dalam grup terpisah -->
             <div class="admin-only" style="display: none;">
                 <hr>
                 <h4>Manajemen Admin</h4>
@@ -46,91 +43,51 @@
             </div>
         </aside>
 
-        <!-- [PINDAH] Konten utama sekarang ada di sini -->
         <main class="dashboard-content">
-            <!-- Elemen Global untuk Status dan Loading -->
             <div id="statusMessage" class="status-message" style="display: none;"></div>
             <div id="loadingIndicator" class="loading-overlay" style="display: none;"><div class="spinner"></div></div>
 
-            <!-- ====================================================== -->
-            <!-- Bagian 1: INPUT JURNAL GURU                            -->
-            <!-- ====================================================== -->
+            <!-- Panel ini akan tampil pertama kali (tanpa style display:none) -->
             <div id="jurnalSection" class="content-section">
                 <div class="card">
                     <div class="card-header">Input Jurnal Pembelajaran</div>
                     <form id="formJurnal">
-                        <input type="hidden" id="jurnalIdToUpdate"> <!-- Untuk fitur edit nanti -->
+                        <input type="hidden" id="jurnalIdToUpdate">
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label for="jurnalKelas">Pilih Kelas</label>
-                                <select id="jurnalKelas" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="jurnalMapel">Pilih Mata Pelajaran</label>
-                                <select id="jurnalMapel" required></select>
-                            </div>
+                            <div class="form-group"><label for="jurnalKelas">Pilih Kelas</label><select id="jurnalKelas" required></select></div>
+                            <div class="form-group"><label for="jurnalMapel">Pilih Mata Pelajaran</label><select id="jurnalMapel" required></select></div>
                         </div>
-                        <div class="form-group">
-                            <label for="jurnalTanggal">Tanggal Pembelajaran</label>
-                            <input type="date" id="jurnalTanggal" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="jurnalMateri">Materi yang Diajarkan</label>
-                            <textarea id="jurnalMateri" rows="4" placeholder="Contoh: Bab 3 - Sistem Reproduksi Manusia" required></textarea>
-                        </div>
-                        <div class="form-group">
-                            <label for="jurnalCatatan">Catatan Tambahan (Opsional)</label>
-                            <textarea id="jurnalCatatan" rows="2" placeholder="Contoh: Siswa sangat antusias, perlu pengulangan materi."></textarea>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" id="submitJurnalButton" class="btn btn-primary">Simpan Jurnal</button>
-                        </div>
+                        <div class="form-group"><label for="jurnalTanggal">Tanggal Pembelajaran</label><input type="date" id="jurnalTanggal" required></div>
+                        <div class="form-group"><label for="jurnalMateri">Materi yang Diajarkan</label><textarea id="jurnalMateri" rows="4" placeholder="Contoh: Bab 3 - Sistem Reproduksi Manusia" required></textarea></div>
+                        <div class="form-group"><label for="jurnalCatatan">Catatan Tambahan (Opsional)</label><textarea id="jurnalCatatan" rows="2" placeholder="Contoh: Siswa sangat antusias, perlu pengulangan materi."></textarea></div>
+                        <div class="form-actions"><button type="submit" id="submitJurnalButton" class="btn btn-primary">Simpan Jurnal</button></div>
                     </form>
                 </div>
             </div>
 
-            <!-- ====================================================== -->
-            <!-- Bagian 2: CATATAN KEDISIPLINAN                         -->
-            <!-- ====================================================== -->
+            <!-- [PERBAIKAN] Semua panel konten berikutnya diberi style="display: none;" -->
             <div id="disiplinSection" class="content-section" style="display: none;">
                 <div class="card">
                     <div class="card-header">Input Catatan Kedisiplinan Siswa</div>
                     <form id="formDisiplin">
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label for="nisnDisiplinInput">NISN Siswa</label>
-                                <input type="text" id="nisnDisiplinInput" name="nisn" placeholder="Ketik NISN atau Nama Siswa untuk mencari..." required>
-                                <div id="nisnSuggestions" class="suggestions-container"></div>
-                            </div>
-                            <div class="form-group">
-                                <label>Nama Siswa</label>
-                                <input type="text" id="namaSiswaDisiplin" disabled placeholder="Nama akan terisi otomatis">
-                            </div>
+                            <div class="form-group"><label for="nisnDisiplinInput">NISN Siswa</label><input type="text" id="nisnDisiplinInput" name="nisn" placeholder="Ketik NISN atau Nama Siswa untuk mencari..." required><div id="nisnSuggestions" class="suggestions-container"></div></div>
+                            <div class="form-group"><label>Nama Siswa</label><input type="text" id="namaSiswaDisiplin" disabled placeholder="Nama akan terisi otomatis"></div>
                         </div>
                         <hr style="margin: 1.5rem 0; border: 0; border-top: 1px solid var(--border-color);">
-                        <div class="form-group">
-                            <label for="deskripsiDisiplinInput">Pilih Pelanggaran</label>
-                            <select id="deskripsiDisiplinInput" name="deskripsi" required></select>
-                        </div>
-                        <div class="form-actions">
-                            <button type="submit" id="submitDisiplinButton" class="btn btn-primary">Simpan Catatan Disiplin</button>
-                        </div>
+                        <div class="form-group"><label for="deskripsiDisiplinInput">Pilih Pelanggaran</label><select id="deskripsiDisiplinInput" name="deskripsi" required></select></div>
+                        <div class="form-actions"><button type="submit" id="submitDisiplinButton" class="btn btn-primary">Simpan Catatan Disiplin</button></div>
                     </form>
                 </div>
             </div>
             
-            <!-- ====================================================== -->
-            <!-- Bagian 3 & 4: RIWAYAT JURNAL & DISIPLIN                 -->
-            <!-- ====================================================== -->
             <div id="riwayatJurnalSection" class="content-section" style="display: none;">
                 <div class="card">
                     <div class="card-header">Riwayat Jurnal Pembelajaran Anda</div>
                     <div class="table-container">
                         <table>
                             <thead><tr><th>Tanggal</th><th>Kelas</th><th>Mata Pelajaran</th><th>Materi</th><th>Aksi</th></tr></thead>
-                            <tbody id="riwayatJurnalTableBody">
-                                <tr><td colspan="5" style="text-align: center;">Tidak ada riwayat untuk ditampilkan.</td></tr>
-                            </tbody>
+                            <tbody id="riwayatJurnalTableBody"><tr><td colspan="5" style="text-align: center;">Tidak ada riwayat untuk ditampilkan.</td></tr></tbody>
                         </table>
                     </div>
                 </div>
@@ -142,38 +99,22 @@
                     <div class="table-container">
                         <table>
                             <thead><tr><th>Tanggal</th><th>NISN</th><th>Nama Siswa</th><th>Pelanggaran</th><th>Poin</th><th>Pencatat</th></tr></thead>
-                            <tbody id="riwayatDisiplinTableBody">
-                                <tr><td colspan="6" style="text-align: center;">Tidak ada riwayat untuk ditampilkan.</td></tr>
-                            </tbody>
+                            <tbody id="riwayatDisiplinTableBody"><tr><td colspan="6" style="text-align: center;">Tidak ada riwayat untuk ditampilkan.</td></tr></tbody>
                         </table>
                     </div>
                 </div>
             </div>
 
-            <!-- ====================================================== -->
-            <!-- Bagian 5: MANAJEMEN PENUGASAN (ADMIN ONLY)             -->
-            <!-- ====================================================== -->
             <div id="penugasanSection" class="content-section admin-only" style="display: none;">
                 <div class="card">
                     <div class="card-header">Manajemen Penugasan Guru</div>
                     <form id="formPenugasan">
                         <div class="form-grid">
-                            <div class="form-group">
-                                <label for="penugasanGuru">Pilih Guru</label>
-                                <select id="penugasanGuru" required></select>
-                            </div>
-                            <div class="form-group">
-                                <label for="penugasanKelas">Nama Kelas</label>
-                                <input type="text" id="penugasanKelas" placeholder="Contoh: X-A" required>
-                            </div>
-                            <div class="form-group">
-                                <label for="penugasanMapel">Mata Pelajaran</label>
-                                <input type="text" id="penugasanMapel" placeholder="Contoh: Matematika Wajib" required>
-                            </div>
+                            <div class="form-group"><label for="penugasanGuru">Pilih Guru</label><select id="penugasanGuru" required></select></div>
+                            <div class="form-group"><label for="penugasanKelas">Nama Kelas</label><input type="text" id="penugasanKelas" placeholder="Contoh: X-A" required></div>
+                            <div class="form-group"><label for="penugasanMapel">Mata Pelajaran</label><input type="text" id="penugasanMapel" placeholder="Contoh: Matematika Wajib" required></div>
                         </div>
-                        <div class="form-actions">
-                            <button type="submit" class="btn btn-accent">Simpan Tugas</button>
-                        </div>
+                        <div class="form-actions"><button type="submit" class="btn btn-accent">Simpan Tugas</button></div>
                     </form>
                     <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-color);">
                     <h4>Daftar Penugasan Aktif</h4>
@@ -186,9 +127,6 @@
                 </div>
             </div>
 
-            <!-- ====================================================== -->
-            <!-- Bagian 6: MANAJEMEN SISWA (ADMIN ONLY)                 -->
-            <!-- ====================================================== -->
             <div id="siswaSection" class="content-section admin-only" style="display: none;">
                  <div class="card">
                     <div class="card-header">Manajemen Database Siswa</div>
@@ -213,9 +151,6 @@
                 </div>
             </div>
             
-            <!-- ====================================================== -->
-            <!-- Bagian 7: MANAJEMEN PENGGUNA (ADMIN ONLY)              -->
-            <!-- ====================================================== -->
             <div id="penggunaSection" class="content-section admin-only" style="display: none;">
                 <div class="card">
                     <div class="card-header">Manajemen Pengguna Sistem</div>
@@ -234,14 +169,7 @@
         </main>
     </div>
     
-    <!-- ====================================================== -->
-    <!-- JAVASCRIPT LIBRARIES & SCRIPT UTAMA                    -->
-    <!-- ====================================================== -->
-    
-    <!-- Library untuk Supabase -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <!-- Script Utama Aplikasi -->
     <script src="app.js"></script>
 </body>
 </html>
