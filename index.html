@@ -20,9 +20,12 @@
     <!-- 2. Main Stylesheet (style.css) -->
     <link rel="stylesheet" href="style.css">
 
-    <!-- 3. Favicon (Ikon Tab Browser) -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>📚</text></svg>">
+   <!-- [PERBAIKAN] Menggunakan logo sekolah untuk semua keperluan ikon -->
+        <link rel="icon" href="https://raw.githubusercontent.com/Wahyudi-1/smpn2mojosari/main/Logo.png">
+        <link rel="apple-touch-icon" href="https://raw.githubusercontent.com/Wahyudi-1/smpn2mojosari/main/Logo.png">
         
+        <!-- Nama aplikasi untuk saat disimpan di layar utama iOS -->
+        <meta name="apple-mobile-web-app-title" content="Jurnal Guru">        
 </head>
 
 <body class="login-page-v2">
@@ -35,14 +38,12 @@
         <!-- Kolom Kiri: Ilustrasi & Pesan Selamat Datang -->
         <div class="login-illustration">
             <div class="illustration-content">
-                <!-- Ikon SVG yang relevan -->
-                <svg width="150" height="150" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M19 20H5C3.89543 20 3 19.1046 3 18V6C3 4.89543 3.89543 4 5 4H19C20.1046 4 21 4.89543 21 6V18C21 19.1046 20.1046 20 19 20Z" fill="#a8c7fa"/>
-                    <path d="M7 8H17V10H7V8Z" fill="#4a90e2"/>
-                    <path d="M7 12H17V14H7V12Z" fill="#4a90e2"/>
-                    <path d="M7 16H13V18H7V16Z" fill="#4a90e2"/>
-                </svg>
-                <h3>Sistem Jurnal & Disiplin Guru</h3>
+                <!-- [PERBAIKAN] Menggunakan logo sekolah -->
+                    <img 
+                        style="max-width: 150px; height: auto; margin-bottom: 1rem;"
+                        src="https://raw.githubusercontent.com/Wahyudi-1/smpn2mojosari/main/Logo.png" 
+                        alt="Logo Sekolah">
+                    <h3>Sistem Jurnal & Disiplin Guru</h3>
                 <p>Akses cepat dan terpusat untuk mengelola data pengajaran dan catatan kedisiplinan siswa.</p>
             </div>
         </div>
