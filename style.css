@@ -463,3 +463,22 @@ tbody tr:hover { background-color: var(--secondary-color); }
         padding: 1rem;
     }
 }
+
+/* [BARU] Penyesuaian untuk branding di halaman login */
+.login-branding h4,
+.login-branding h5 {
+    margin-top: 0.25rem; /* Mengurangi jarak atas secara signifikan */
+    margin-bottom: 0.25rem; /* Mengurangi jarak bawah secara signifikan */
+    line-height: 1.2; /* Merapatkan jarak antar baris jika teksnya panjang */
+}
+
+.login-branding h4 {
+    font-size: 1.5rem; /* Sesuaikan ukuran font jika perlu */
+    color: var(--primary-dark);
+}
+
+.login-branding h5 {
+    font-size: 1.2rem; /* Sesuaikan ukuran font jika perlu */
+    font-weight: 600; /* Membuat nama sekolah sedikit tebal */
+    color: var(--primary-color);
+}
