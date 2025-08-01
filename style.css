@@ -385,3 +385,81 @@ tbody tr:hover { background-color: var(--secondary-color); }
         color: var(--text-color);
     }
 }
+
+/* -----------------------------------------------------------------
+   8. [BARU] DASHBOARD LAYOUT DENGAN SIDEBAR
+   ----------------------------------------------------------------- */
+
+.dashboard-wrapper {
+    display: grid;
+    grid-template-columns: 240px 1fr; /* Lebar sidebar 240px, sisa untuk konten */
+    min-height: calc(100vh - 68px); /* Tinggi penuh dikurangi tinggi header */
+}
+
+.sidebar-nav {
+    background-color: var(--white-color);
+    padding: 1.5rem 1rem;
+    border-right: 1px solid var(--border-color);
+}
+
+.sidebar-nav h4 {
+    color: var(--text-light);
+    text-transform: uppercase;
+    font-size: 0.8em;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    margin-top: 1rem;
+}
+
+.sidebar-nav hr {
+    border: 0;
+    border-top: 1px solid var(--border-color);
+    margin: 1rem 0;
+}
+
+/* Mengubah gaya tombol navigasi untuk sidebar */
+.sidebar-nav .btn-nav {
+    display: block;
+    width: 100%;
+    padding: 0.75rem 1rem;
+    margin: 0.25rem 0;
+    text-align: left;
+    background-color: transparent;
+    color: var(--text-color);
+    font-weight: 500;
+    border: none;
+    border-radius: var(--border-radius);
+}
+
+.sidebar-nav .btn-nav:hover {
+    background-color: var(--secondary-color);
+    color: var(--primary-dark);
+    transform: none;
+    box-shadow: none;
+}
+
+.sidebar-nav .btn-nav.active {
+    background-color: var(--primary-color);
+    color: var(--white-color);
+    font-weight: 600;
+}
+
+.dashboard-content {
+    padding: 1.5rem;
+    background-color: var(--secondary-color);
+}
+
+/* Penyesuaian untuk Mobile */
+@media (max-width: 992px) {
+    .dashboard-wrapper {
+        grid-template-columns: 1fr; /* Sidebar dan konten menjadi satu kolom */
+    }
+    .sidebar-nav {
+        border-right: none;
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem;
+    }
+    .dashboard-content {
+        padding: 1rem;
+    }
+}
