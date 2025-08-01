@@ -2,7 +2,7 @@
  * =================================================================
  * SCRIPT UTAMA - SISTEM JURNAL & DISIPLIN GURU
  * =================================================================
- * @version 2.0 - Final Clean Code
+ * @version 3.0 - Final Production Code
  * @author Disesuaikan oleh AI untuk Proyek Anda
  *
  * Terhubung dengan Supabase untuk otentikasi dan database.
@@ -394,6 +394,67 @@ async function handlePenggunaSubmit(event) {
 }
 
 // --- 4.5 Fungsi Modul Manajemen Siswa (Admin) ---
+async function refreshSiswaData() {
+    showLoading(true);
+    const { data: updatedSiswa, error } = await supabase.from('siswa').select('nisn, nama, kelas').order('nama');
+    showLoading(false);
+    
+    if (error) {
+        return showStatusMessage('Gagal memuat ulang data siswa.', 'error');
+    }
+
+    if (updatedSiswa) {
+        AppState.students = updatedSiswa;
+        loadSiswaTable();
+        showStatusMessage('Data siswa berhasil dimuat ulang.', 'success');
+    }
+}
+
+function exportSiswaToExcel() {
+    if (AppState.students.length === 0) {
+        return showStatusMessage('Tidak ada data siswa untuk diekspor.', 'info');
+    }
+    const worksheet = XLSX.utils.json_to_sheet(AppState.students);
+    const workbook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(workbook, worksheet, "Data Siswa");
+    XLSX.writeFile(workbook, `Data_Siswa_${new Date().toISOString().slice(0, 10)}.xlsx`);
+}
+
+async function handleSiswaImport(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+
+    showLoading(true);
+    Papa.parse(file, {
+        header: true,
+        skipEmptyLines: true,
+        complete: async function(results) {
+            const dataToInsert = results.data.map(row => ({
+                nisn: row.nisn || row.NISN,
+                nama: row.nama || row.Nama,
+                kelas: row.kelas || row.Kelas
+            })).filter(s => s.nisn && s.nama && s.kelas); 
+
+            if (dataToInsert.length === 0) {
+                showLoading(false);
+                return showStatusMessage('File CSV tidak berisi data yang valid. Pastikan header adalah: nisn, nama, kelas.', 'error');
+            }
+
+            const { error } = await supabase.from('siswa').upsert(dataToInsert, { onConflict: 'nisn' });
+            
+            showLoading(false);
+            if (error) { return showStatusMessage(`Gagal mengimpor data: ${error.message}`, 'error'); }
+            showStatusMessage(`${dataToInsert.length} data siswa berhasil diimpor/diperbarui!`, 'success');
+            await refreshSiswaData();
+        },
+        error: function(err) {
+            showLoading(false);
+            showStatusMessage(`Gagal membaca file CSV: ${err.message}`, 'error');
+        }
+    });
+    event.target.value = '';
+}
+
 function loadSiswaTable() {
     const tableBody = document.getElementById('siswaResultsTableBody');
     if (!tableBody) return;
@@ -422,11 +483,9 @@ async function saveSiswaHandler(event) {
         nama: document.getElementById('formNama').value.trim(),
         kelas: document.getElementById('formKelas').value.trim(),
     };
-
     if (!siswaData.nisn || !siswaData.nama || !siswaData.kelas) {
         return showStatusMessage('Semua kolom siswa wajib diisi.', 'error');
     }
-
     showLoading(true);
     let error;
     if (oldNisn) {
@@ -437,15 +496,10 @@ async function saveSiswaHandler(event) {
         error = insertError;
     }
     showLoading(false);
-
     if (error) return showStatusMessage(`Gagal menyimpan data siswa: ${error.message}`, 'error');
-    
     showStatusMessage(oldNisn ? 'Data siswa berhasil diperbarui.' : 'Siswa baru berhasil ditambahkan.', 'success');
     resetFormSiswa();
-    
-    const { data: updatedSiswa } = await supabase.from('siswa').select('nisn, nama, kelas');
-    if (updatedSiswa) AppState.students = updatedSiswa;
-    loadSiswaTable();
+    await refreshSiswaData();
 }
 
 function editSiswaHandler(nisn) {
@@ -472,7 +526,6 @@ async function deleteSiswaHandler(nisn) {
     showLoading(true);
     const { error } = await supabase.from('siswa').delete().eq('nisn', nisn);
     showLoading(false);
-
     if (error) return showStatusMessage(`Gagal menghapus siswa: ${error.message}`, 'error');
 
     showStatusMessage('Siswa berhasil dihapus.', 'success');
@@ -509,6 +562,13 @@ function setupDashboardListeners() {
     document.getElementById('formPengguna')?.addEventListener('submit', handlePenggunaSubmit);
     document.getElementById('formSiswa')?.addEventListener('submit', saveSiswaHandler);
     document.getElementById('resetSiswaButton')?.addEventListener('click', resetFormSiswa);
+    
+    document.getElementById('refreshSiswaButton')?.addEventListener('click', refreshSiswaData);
+    document.getElementById('exportSiswaButton')?.addEventListener('click', exportSiswaToExcel);
+    document.getElementById('importSiswaButton')?.addEventListener('click', () => {
+        document.getElementById('importSiswaInput').click();
+    });
+    document.getElementById('importSiswaInput')?.addEventListener('change', handleSiswaImport);
     
     setupSiswaSearch();
 }
