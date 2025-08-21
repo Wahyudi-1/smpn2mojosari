@@ -13,8 +13,8 @@
 // TAHAP 1: KONFIGURASI GLOBAL DAN STATE APLIKASI
 // ====================================================================
 
-const SUPABASE_URL = 'https://patjsszankjdlnktrfmh.supabase.co';
-const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdGpzc3phbmtqZGxua3RyZm1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzEzODUsImV4cCI6MjA2OTM0NzM4NX0.eZLV-7HbhQMFS3EF4e-Q5UuPRKVssgirL1cQxj7yJEg';
+// const SUPABASE_URL = 'https://patjsszankjdlnktrfmh.supabase.co';
+// const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBhdGpzc3phbmtqZGxua3RyZm1oIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM3NzEzODUsImV4cCI6MjA2OTM0NzM4NX0.eZLV-7HbhQMFS3EF4e-Q5UuPRKVssgirL1cQxj7yJEg';
 
 const { createClient } = window.supabase;
 const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
