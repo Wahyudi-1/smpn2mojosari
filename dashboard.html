@@ -210,14 +210,36 @@
                 <div class="card">
                     <div class="card-header">Manajemen Pengguna Sistem</div>
                     <form id="formPengguna" class="form-container">
+                        <input type="hidden" id="formUserIdToUpdate"> <!-- ADDED: Input tersembunyi untuk ID pengguna yang akan diupdate -->
                         <div class="form-group"><label for="formNamaPengguna">Nama Lengkap</label><input type="text" id="formNamaPengguna" required></div>
                         <div class="form-group"><label for="formEmailPengguna">Email</label><input type="email" id="formEmailPengguna" required></div>
                         <div class="form-group"><label for="formPasswordPengguna">Password</label><input type="password" id="formPasswordPengguna" placeholder="Minimal 6 karakter" required></div>
                         <div class="form-group"><label for="formPeran">Peran</label><select id="formPeran" required><option value="Guru" selected>Guru</option><option value="Admin">Admin</option></select></div>
                         <div class="form-actions">
-                            <button type="submit" class="btn btn-accent">Buat Pengguna Baru</button>
+                            <button type="submit" id="submitPenggunaButton" class="btn btn-accent">Buat Pengguna Baru</button> <!-- CHANGED: Added ID -->
+                            <button type="button" id="resetPenggunaButton" class="btn btn-secondary">Batal</button> <!-- ADDED: Tombol Batal/Reset -->
                         </div>
                     </form>
+                    <!-- ADDED: Bagian untuk menampilkan daftar pengguna -->
+                    <hr style="margin: 2rem 0; border: 0; border-top: 1px solid var(--border-color);">
+                    <h4>Daftar Pengguna Sistem</h4>
+                    <div class="table-container">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Nama Lengkap</th>
+                                    <th>Email</th>
+                                    <th>Peran</th>
+                                    <th>Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody id="penggunaTableBody">
+                                <!-- Data pengguna akan dimuat di sini oleh JavaScript -->
+                                <tr><td colspan="4" style="text-align: center;">Memuat daftar pengguna...</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <!-- END ADDED SECTION -->
                 </div>
             </div>
         </main>
