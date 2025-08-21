@@ -2,7 +2,7 @@
  * =================================================================
  * SCRIPT UTAMA - SISTEM JURNAL & DISIPLIN GURU
  * =================================================================
- * @version 6.0 - Final Production Code with All History Panels
+ * @version 6.1 - Added User Management Panel
  * @author Disesuaikan oleh AI untuk Proyek Anda
  *
  * Terhubung dengan Supabase untuk otentikasi dan database.
@@ -610,30 +610,147 @@ async function deletePenugasan(id) {
     loadPenugasanTable();
 }
 
+// [MODIFIKASI] Fungsi handlePenggunaSubmit diubah untuk menangani CREATE dan UPDATE
 async function handlePenggunaSubmit(event) {
     event.preventDefault();
-    const nama = document.getElementById('formNamaPengguna').value;
-    const email = document.getElementById('formEmailPengguna').value;
-    const password = document.getElementById('formPasswordPengguna').value;
-    const role = document.getElementById('formPeran').value;
-    
-    showLoading(true);
-    const { data, error } = await supabase.auth.signUp({
-        email,
-        password,
-        options: {
-            data: {
-                full_name: nama,
-                role: role
-            }
+    const userIdToUpdate = document.getElementById('formUserIdToUpdate').value;
+
+    if (userIdToUpdate) {
+        // --- LOGIKA UPDATE ---
+        const updates = {
+            email: document.getElementById('formEmailPengguna').value,
+            data: { // Gunakan 'data' bukan 'user_metadata' untuk Supabase v2
+                full_name: document.getElementById('formNamaPengguna').value,
+                role: document.getElementById('formPeran').value,
+            },
+        };
+        const password = document.getElementById('formPasswordPengguna').value;
+        if (password) {
+            if (password.length < 6) return showStatusMessage('Password baru minimal 6 karakter.', 'error');
+            updates.password = password;
         }
-    });
+
+        showLoading(true);
+        // Menggunakan fungsi admin.updateUserById yang sekarang berada di bawah supabase.auth.admin
+        const { data: { user }, error } = await supabase.auth.admin.updateUserById(userIdToUpdate, updates);
+        showLoading(false);
+
+        if (error) return showStatusMessage(`Gagal update pengguna: ${error.message}`, 'error');
+        showStatusMessage('Data pengguna berhasil diperbarui.', 'success');
+    } else {
+        // --- LOGIKA CREATE (YANG SUDAH ADA) ---
+        const nama = document.getElementById('formNamaPengguna').value;
+        const email = document.getElementById('formEmailPengguna').value;
+        const password = document.getElementById('formPasswordPengguna').value;
+        const role = document.getElementById('formPeran').value;
+        
+        showLoading(true);
+        const { data, error } = await supabase.auth.signUp({
+            email,
+            password,
+            options: {
+                data: {
+                    full_name: nama,
+                    role: role
+                }
+            }
+        });
+        showLoading(false);
+
+        if (error) return showStatusMessage(`Gagal membuat pengguna: ${error.message}`, 'error');
+        if (data.user) showStatusMessage(`Pengguna ${email} berhasil dibuat!`, 'success');
+    }
+
+    resetPenggunaForm();
+    loadUsersTable();
+}
+
+// [BARU] Fungsi-fungsi untuk manajemen pengguna
+async function loadUsersTable() {
+    const tableBody = document.getElementById('penggunaTableBody');
+    if (!tableBody) return;
+    tableBody.innerHTML = '<tr><td colspan="4">Memuat data pengguna...</td></tr>';
+    showLoading(true);
+
+    const { data, error } = await supabase.rpc('get_all_users');
     showLoading(false);
 
-    if (error) return showStatusMessage(`Gagal membuat pengguna: ${error.message}`, 'error');
-    if (data.user) showStatusMessage(`Pengguna ${email} berhasil dibuat!`, 'success');
-    event.target.reset();
+    if (error) {
+        tableBody.innerHTML = '<tr><td colspan="4">Gagal memuat pengguna. Anda mungkin bukan Admin.</td></tr>';
+        return showStatusMessage(`Error: ${error.message}`, 'error');
+    }
+    renderUsersTable(data);
 }
+
+function renderUsersTable(users) {
+    const tableBody = document.getElementById('penggunaTableBody');
+    const currentUserId = AppState.user.id; 
+
+    if (!users || users.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="4" style="text-align: center;">Belum ada pengguna terdaftar.</td></tr>';
+        return;
+    }
+
+    tableBody.innerHTML = users.map(user => {
+        const isCurrentUser = user.id === currentUserId;
+        const disabledAttr = isCurrentUser ? 'disabled' : '';
+        const escapedFullName = user.full_name ? user.full_name.replace(/'/g, "\\'") : '';
+        const escapedEmail = user.email.replace(/'/g, "\\'");
+
+        return `
+            <tr>
+                <td data-label="Nama">${user.full_name || 'N/A'}</td>
+                <td data-label="Email">${user.email}</td>
+                <td data-label="Peran">${user.role}</td>
+                <td data-label="Aksi">
+                    <button class="btn btn-sm btn-secondary" onclick="editUserHandler('${user.id}', '${escapedFullName}', '${escapedEmail}', '${user.role}')" ${disabledAttr}>Ubah</button>
+                    <button class="btn btn-sm btn-danger" onclick="deleteUserHandler('${user.id}')" ${disabledAttr}>Hapus</button>
+                </td>
+            </tr>
+        `;
+    }).join('');
+}
+
+function editUserHandler(id, fullName, email, role) {
+    document.getElementById('formUserIdToUpdate').value = id;
+    document.getElementById('formNamaPengguna').value = fullName;
+    document.getElementById('formEmailPengguna').value = email;
+    document.getElementById('formPeran').value = role;
+    
+    const passwordInput = document.getElementById('formPasswordPengguna');
+    passwordInput.placeholder = 'Isi hanya jika ingin mengubah password';
+    passwordInput.required = false;
+
+    document.getElementById('submitPenggunaButton').textContent = 'Update Pengguna';
+    document.getElementById('penggunaSection').scrollIntoView({ behavior: 'smooth' });
+}
+
+async function deleteUserHandler(userId) {
+    if (!confirm('Apakah Anda yakin ingin menghapus pengguna ini? Tindakan ini tidak dapat dibatalkan.')) return;
+    
+    showLoading(true);
+    const { data, error } = await supabase.auth.admin.deleteUser(userId);
+    showLoading(false);
+
+    if (error) {
+        return showStatusMessage(`Gagal menghapus pengguna: ${error.message}`, 'error');
+    }
+
+    showStatusMessage('Pengguna berhasil dihapus.', 'success');
+    loadUsersTable();
+}
+
+function resetPenggunaForm() {
+    document.getElementById('formPengguna').reset();
+    document.getElementById('formUserIdToUpdate').value = '';
+    
+    const passwordInput = document.getElementById('formPasswordPengguna');
+    passwordInput.placeholder = 'Minimal 6 karakter';
+    passwordInput.required = true;
+    
+    document.getElementById('submitPenggunaButton').textContent = 'Buat Pengguna Baru';
+}
+
 
 // --- 4.5 Fungsi Modul Manajemen Siswa (Admin) ---
 async function refreshSiswaData() {
@@ -731,7 +848,7 @@ async function saveSiswaHandler(event) {
     showLoading(true);
     let error;
     if (oldNisn) {
-        const { error: updateError } = await supabase.from('siswa').update(siswaData).eq('nisn', oldNisn);
+        const { error: updateError } = await supabase.from('siswa').update( siswaData).eq('nisn', oldNisn);
         error = updateError;
     } else {
         const { error: insertError } = await supabase.from('siswa').insert(siswaData);
@@ -796,6 +913,7 @@ function setupDashboardListeners() {
             if (sectionId === 'riwayatDisiplinSection') loadRiwayatDisiplin();
             if (sectionId === 'penugasanSection') loadPenugasanTable();
             if (sectionId === 'siswaSection') loadSiswaTable();
+            if (sectionId === 'penggunaSection') loadUsersTable(); // [BARU]
         });
     });
 
@@ -806,6 +924,7 @@ function setupDashboardListeners() {
     document.getElementById('formPengguna')?.addEventListener('submit', handlePenggunaSubmit);
     document.getElementById('formSiswa')?.addEventListener('submit', saveSiswaHandler);
     document.getElementById('resetSiswaButton')?.addEventListener('click', resetFormSiswa);
+    document.getElementById('resetPenggunaButton')?.addEventListener('click', resetPenggunaForm); // [BARU]
     
     // Event listeners untuk tombol aksi
     document.getElementById('refreshSiswaButton')?.addEventListener('click', refreshSiswaData);
